@@ -1,163 +1,115 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
-export default function HowIThink() {
-  const [isOpen, setIsOpen] = useState(false);
+const ITEMS = [
+  { n: "01", title: "User experience", sub: "over metrics", desc: "Numbers lie. The person using your system never does." },
+  { n: "02", title: "Simplicity", sub: "over complexity", desc: "If you can't explain it simply, you don't understand it deeply enough." },
+  { n: "03", title: "AI amplifies", sub: "not replaces", desc: "The best systems make humans more capable, not more replaceable." },
+  { n: "04", title: "Endurance", sub: "over excuses", desc: "Talent gets you started. Showing up every single day gets you there." },
+];
 
-  const principles = [
-    { title: "User experience over metrics", angle: -60 },
-    { title: "Simplicity over complexity", angle: -20 },
-    { title: "AI amplifies, not replaces", angle: 20 },
-    { title: "Endurance over excuses", angle: 60 }
-  ];
+/*
+ * Each card tracks its own position relative to the viewport.
+ * When it enters from the bottom → rotateX(35deg), scaled down, faded.
+ * When it hits center → rotateX(0), full scale, full opacity.
+ * When it exits top → rotateX(-35deg), scaled down, faded.
+ * This creates the vertical "spine" / drum effect from at.mp4.
+ */
+function SpineCard({ item, index }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+    layoutEffect: false,
+  });
+
+  // 0 = card entering from bottom, 0.5 = center of viewport, 1 = exiting top
+  const rotateX = useTransform(scrollYProgress, [0, 0.35, 0.5, 0.65, 1], [45, 10, 0, -10, -45]);
+  const scale = useTransform(scrollYProgress, [0, 0.35, 0.5, 0.65, 1], [0.7, 0.9, 1, 0.9, 0.7]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.5, 0.7, 1], [0, 0.7, 1, 0.7, 0]);
+  const z = useTransform(scrollYProgress, [0, 0.5, 1], [-150, 0, -150]);
 
   return (
-    <section 
-      id="HowIThink"
-      className="relative min-h-screen flex items-center px-6 md:px-16 py-20 overflow-hidden"
-      style={{ background: 'linear-gradient(to bottom, #000000, #050505)' }}
-    >
-      {/* SPACE TRAVEL STARS */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        {[0,8,16,24,32,40,48,56,64,72,80,88].map((left) => (
-          <div
-            key={left}
-            style={{
-              position: 'absolute',
-              left: `${left}%`,
-              top: '-50px',
-              width: '3px',
-              height: '3px',
-              background: 'linear-gradient(to bottom, transparent, white, transparent)',
-              animation: 'startravel 4s linear infinite',
-              animationDelay: `${left * 0.1}s`,
-              boxShadow: '0 0 6px rgba(255,255,255,0.8)',
-              opacity: 0.7
-            }}
-          />
+    <div ref={ref} style={{
+      height: "70vh", display: "flex", alignItems: "center", justifyContent: "center",
+      perspective: "1000px",
+    }}>
+      <motion.div
+        data-hover
+        style={{
+          rotateX, scale, opacity, z,
+          transformStyle: "preserve-3d",
+          width: "min(600px, 85vw)",
+          padding: "clamp(2rem, 4vw, 3.5rem)",
+          borderRadius: 20,
+          background: "rgba(201,168,124,0.025)",
+          border: "1px solid rgba(201,168,124,0.08)",
+          backdropFilter: "blur(6px)",
+          position: "relative", overflow: "hidden",
+          transformOrigin: "center center",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+        }}
+      >
+        {/* ghost number */}
+        <span style={{
+          position: "absolute", top: "0.5rem", right: "1.5rem",
+          fontSize: "clamp(5rem, 12vw, 10rem)", fontWeight: 900,
+          color: "transparent", WebkitTextStroke: "1px rgba(201,168,124,0.05)",
+          lineHeight: 1, pointerEvents: "none",
+        }}>{item.n}</span>
+
+        <span style={{ color: "#c9a87c", fontSize: "0.6rem", fontFamily: "monospace",
+          letterSpacing: "0.25em", marginBottom: "1.2rem", display: "block" }}>({item.n})</span>
+        <h3 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900,
+          color: "#f5f0eb", letterSpacing: "-0.03em", lineHeight: 1.05, marginBottom: "0.3rem" }}>
+          {item.title}
+        </h3>
+        <p style={{ fontSize: "clamp(1.3rem, 2.5vw, 2rem)", fontWeight: 300,
+          color: "#c9a87c", marginBottom: "1.2rem", letterSpacing: "-0.02em" }}>
+          {item.sub}
+        </p>
+        <p style={{ fontSize: "0.85rem", color: "#8a8580", maxWidth: 420, lineHeight: 1.7 }}>
+          {item.desc}
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
+export default function HowIThink() {
+  return (
+    <section id="HowIThink" style={{
+      position: "relative", padding: "6rem clamp(2rem, 8vw, 10rem) 0",
+      background: "#0a0a0a", overflow: "hidden",
+    }}>
+      {/* ambient glow */}
+      <div style={{ position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)",
+        width: "50vw", height: "50vw", borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(201,168,124,0.03), transparent 60%)",
+        filter: "blur(60px)", pointerEvents: "none" }} />
+
+      {/* heading — outside the scroll area, stays visible */}
+      <div style={{ maxWidth: 700, margin: "0 auto", position: "relative", zIndex: 1, marginBottom: "0" }}>
+        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }} viewport={{ once: true }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.8rem" }}>
+            <div style={{ width: 50, height: 1, background: "linear-gradient(to right, #c9a87c, transparent)" }} />
+            <span style={{ color: "#5a5a5a", fontSize: "0.55rem", letterSpacing: "0.3em", fontFamily: "monospace", textTransform: "uppercase" }}>PHILOSOPHY</span>
+          </div>
+          <h2 style={{ fontSize: "clamp(3rem, 7vw, 7rem)", fontWeight: 900, lineHeight: 0.85,
+            letterSpacing: "-0.05em", color: "#f5f0eb" }}>
+            How I<br />Think<span style={{ color: "#c9a87c" }}>.</span>
+          </h2>
+        </motion.div>
+      </div>
+
+      {/* spine cards */}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        {ITEMS.map((item, i) => (
+          <SpineCard key={item.n} item={item} index={i} />
         ))}
       </div>
-
-      <div className="relative z-10 w-full max-w-7xl">
-        
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="relative"
-          style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-        >
-          {/* Main Title - DOUBLE SIZE, LEFT ALIGNED, CLICKABLE */}
-          <motion.h2
-            onClick={() => setIsOpen(!isOpen)}
-            whileHover={{ scale: 1.02 }}
-            className="font-black cursor-pointer select-none"
-            style={{
-              fontSize: 'clamp(8rem, 2vw, 100rem)',
-              background: 'linear-gradient(to right, #3b82f6, #60a5fa)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              lineHeight: 0.9
-            }}
-          >
-            How I Think
-          </motion.h2>
-
-          {/* "click me" hint - BELOW title */}
-          {!isOpen && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              className="text-lg mt-4"
-style={{ marginTop: '-100px', color: 'rgba(255, 255, 255, 0.4)' }}
-            >
-              click me
-            </motion.p>
-          )}
-
-          {/* Thought Bubbles in Semi-Circle - CLOSER */}
-          <AnimatePresence>
-            {isOpen && (
-              <>
-                {principles.map((principle, i) => {
-                  const radius = 220;
-                  const angleRad = (principle.angle * Math.PI) / 180;
-                  const x = Math.cos(angleRad) * radius;
-                  const y = Math.sin(angleRad) * radius;
-
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
-                      animate={{ opacity: 1, scale: 1, x: x, y: y }}
-                      exit={{ opacity: 0, scale: 0, x: 0, y: 0 }}
-                      transition={{ 
-                        duration: 0.5, 
-                        delay: i * 0.1,
-                        type: "spring",
-                        stiffness: 200
-                      }}
-                      whileHover={{ scale: 1.1 }}
-                      style={{
-                        position: 'absolute',
-                        left: '30%',
-                        top: '40%',
-                        transform: `translate(-50%, -50%)`,
-                        zIndex: 10
-                      }}
-                    >
-                      <div
-                        style={{
-                          background: 'rgba(0, 0, 0, 0.9)',
-                          border: '2px solid rgba(59, 130, 246, 0.5)',
-                          borderRadius: '16px',
-                          padding: '1.5rem 2rem',
-                          minWidth: '250px',
-                          maxWidth: '300px',
-                          boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)',
-                          backdropFilter: 'blur(10px)'
-                        }}
-                      >
-                        <div className="flex items-start gap-2 mb-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                          <p className="text-white font-bold text-lg leading-tight">
-                            {principle.title}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </>
-            )}
-          </AnimatePresence>
-
-        </motion.div>
-
-      </div>
-
-      <style jsx>{`
-        @keyframes startravel {
-          0% {
-            transform: translateY(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: 0.7;
-          }
-          90% {
-            opacity: 0.7;
-          }
-          100% {
-            transform: translateY(calc(100vh + 50px));
-            opacity: 0;
-          }
-        }
-      `}</style>
     </section>
   );
 }

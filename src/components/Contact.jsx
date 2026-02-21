@@ -1,207 +1,148 @@
 "use client";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 export default function Contact() {
-  const socialLinks = [
-    {
-      name: "GitHub",
-      url: "https://github.com/bhavyasreepyla",
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-      )
-    },
-    {
-      name: "LinkedIn",
-      url: "https://linkedin.com/in/bhavyasreepyla",
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-        </svg>
-      )
-    },
-    {
-      name: "Email",
-      url: "mailto:pylabhavyasree1@gmail.com",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      )
-    }
-  ];
+  const [time, setTime] = useState("");
+  const [dots, setDots] = useState("");
+  const [bars, setBars] = useState([]);
+
+  useEffect(() => {
+    // Generate bars on client only to avoid hydration mismatch
+    setBars(Array.from({ length: 20 }, (_, i) => ({
+      left: `${(i * 7) % 100}%`,
+      width: `${2 + Math.random() * 8}%`,
+      opacity: 0.15 + Math.random() * 0.3,
+      dur: 3 + Math.random() * 4,
+      delay: Math.random() * 2,
+    })));
+    const tick = () => {
+      const now = new Date();
+      setTime(now.toLocaleTimeString("en-US", { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false, timeZone:"America/New_York" }));
+    };
+    tick();
+    const iv = setInterval(tick, 1000);
+    const dv = setInterval(() => setDots(p => p.length >= 3 ? "" : p + "."), 500);
+    return () => { clearInterval(iv); clearInterval(dv); };
+  }, []);
 
   return (
-    <section 
-      id="Contact"
-      className="relative min-h-screen flex flex-col justify-center px-6 md:px-16 py-20 overflow-hidden"
-      style={{ background: '#000000' }}
-    >
-      {/* SPACE TRAVEL STARS */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        {[0,8,16,24,32,40,48,56,64,72,80,88].map((left) => (
-          <div
-            key={left}
-            style={{
-              position: 'absolute',
-              left: `${left}%`,
-              top: '-50px',
-              width: '3px',
-              height: '3px',
-              background: 'linear-gradient(to bottom, transparent, white, transparent)',
-              animation: 'startravel 4s linear infinite',
-              animationDelay: `${left * 0.1}s`,
-              boxShadow: '0 0 6px rgba(255,255,255,0.8)',
-              opacity: 0.7
-            }}
-          />
-        ))}
-      </div>
+    <section id="Contact" style={{
+      position: "relative", padding: "0", background: "#0a0a0a", overflow: "hidden",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+    }}>
+      <div style={{ position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)",
+        width: "60vw", height: "40vw", background: "radial-gradient(ellipse, rgba(201,168,124,0.04), transparent 60%)",
+        filter: "blur(60px)", pointerEvents: "none" }} />
 
-      <div className="relative z-10 max-w-6xl mx-auto w-full">
-        
-        {/* Main CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, type: "spring" }}
-          viewport={{ once: true }}
-          className="text-center mb-20"
-        >
-          <motion.h2 
-            className="font-black mb-8"
-            style={{
-              fontSize: 'clamp(3rem, 10vw, 10rem)',
-              background: 'linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              lineHeight: 1
-            }}
-          >
-            Let's Build Something
-          </motion.h2>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto"
-          >
-            Open to opportunities, collaborations, and conversations about AI, research, or interesting problems
-          </motion.p>
-
-          {/* Email CTA Button */}
-          <motion.a
-            href="mailto:pylabhavyasree1@gmail.com"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            viewport={{ once: true }}
-            whileHover={{ scale: 1.05, y: -5 }}
-            className="inline-block px-12 py-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-xl rounded-full transition-all"
-            style={{ boxShadow: '0 20px 60px rgba(59, 130, 246, 0.4)' }}
-          >
-            Get in Touch →
-          </motion.a>
-        </motion.div>
-
-        {/* Social Links Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          viewport={{ once: true }}
-          className="flex justify-center gap-8 mb-20"
-        >
-          {socialLinks.map((link, i) => (
-            <motion.a
-              key={i}
-              href={link.url}
-              target={link.name !== "Email" ? "_blank" : undefined}
-              rel={link.name !== "Email" ? "noopener noreferrer" : undefined}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 + i * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -5, scale: 1.1 }}
-              className="group flex flex-col items-center gap-3"
-            >
-              <div 
-                className="w-16 h-16 flex items-center justify-center rounded-full transition-all"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
-                  e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div className="text-gray-400 group-hover:text-blue-400 transition-colors">
-                  {link.icon}
-                </div>
-              </div>
-              <span className="text-gray-500 group-hover:text-blue-400 transition-colors text-sm font-medium">
-                {link.name}
-              </span>
-            </motion.a>
+      {/* transition marquee */}
+      <div style={{ overflow: "hidden", padding: "1.5rem 0",
+        borderTop: "1px solid rgba(201,168,124,0.04)", borderBottom: "1px solid rgba(201,168,124,0.04)",
+        background: "rgba(201,168,124,0.008)" }}>
+        <div style={{ display: "flex", whiteSpace: "nowrap", width: "max-content",
+          animation: "marqueeR 40s linear infinite" }}>
+          {[0,1].map(k => (
+            <span key={k} style={{ fontSize: "0.55rem", color: "#2a2520", fontWeight: 700,
+              letterSpacing: "0.4em", paddingRight: "4rem", fontFamily: "monospace" }}>
+              LET'S CONNECT • OPEN TO OPPORTUNITIES • RESEARCH • COLLABORATION • AI FOR GOOD • LET'S BUILD •{" "}
+            </span>
           ))}
-        </motion.div>
+        </div>
+      </div>
+      <style jsx global>{`@keyframes marqueeR { from { transform: translateX(-50%); } to { transform: translateX(0); } }`}</style>
 
-        {/* Divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          transition={{ duration: 1, delay: 1 }}
-          viewport={{ once: true }}
-          style={{
-            height: '1px',
-            background: 'linear-gradient(to right, transparent, rgba(59, 130, 246, 0.3), transparent)',
-            marginBottom: '3rem',
-          }}
-        />
+      <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "4rem clamp(2rem, 6vw, 8rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%",
+          display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem, 8vw, 8rem)", alignItems: "center" }}>
 
-        {/* Footer Credits */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2 }}
-          viewport={{ once: true }}
-          className="flex flex-col md:flex-row justify-between items-center gap-4 text-gray-600 text-sm"
-        >
-          <p>© 2026 Bhavya Sree Pyla</p>
-          <p>Designed & Built with care</p>
-          <p className="text-gray-700">Portland, Maine · MS in AI @ Northeastern</p>
-        </motion.div>
+          <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22,1,0.36,1] }} viewport={{ once: true }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <div style={{ width: 50, height: 1, background: "linear-gradient(to right, #c9a87c, transparent)" }} />
+              <span style={{ color: "#5a5a5a", fontSize: "0.55rem", letterSpacing: "0.3em", fontFamily: "monospace", textTransform: "uppercase" }}>CONNECT</span>
+            </div>
+            <h2 style={{ fontSize: "clamp(3rem, 7vw, 7rem)", fontWeight: 900, lineHeight: 0.88,
+              letterSpacing: "-0.05em", color: "#f5f0eb", marginBottom: "1.5rem" }}>
+              Let's<br/>Build<br/><span style={{ color: "#c9a87c" }}>Something.</span>
+            </h2>
+            <p style={{ fontSize: "0.9rem", color: "#8a8580", maxWidth: 380, lineHeight: 1.7, marginBottom: "2.5rem" }}>
+              Open to opportunities, collaborations, and conversations about AI, research, or interesting problems.
+            </p>
+            <a data-hover href="mailto:pylabhavyasree1@gmail.com" style={{
+              display: "inline-block", padding: "1.1rem 3rem", fontSize: "0.7rem", fontWeight: 700,
+              color: "#0a0a0a", background: "#c9a87c", borderRadius: 6, textDecoration: "none",
+              fontFamily: "monospace", letterSpacing: "0.15em", textTransform: "uppercase",
+              boxShadow: "0 10px 35px rgba(201,168,124,0.2)", transition: "transform 0.3s, box-shadow 0.3s",
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 14px 45px rgba(201,168,124,0.35)"}}
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 10px 35px rgba(201,168,124,0.2)"}}
+            >Get in Touch →</a>
+          </motion.div>
 
+          <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }} viewport={{ once: true }}
+            style={{ border: "1px solid rgba(201,168,124,0.08)", borderRadius: 12, padding: "2.5rem",
+              background: "rgba(201,168,124,0.01)", backdropFilter: "blur(4px)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "2rem" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80",
+                boxShadow: "0 0 8px rgba(74,222,128,0.5)", animation: "blink 2s ease-in-out infinite" }} />
+              <span style={{ color: "#4ade80", fontSize: "0.55rem", fontFamily: "monospace", letterSpacing: "0.15em" }}>
+                AVAILABLE FOR WORK{dots}
+              </span>
+            </div>
+            {[
+              ["LOCATION", "Portland, Maine, US"],
+              ["LOCAL TIME", time + " EST"],
+              ["PROGRAM", "MS AI @ Northeastern"],
+              ["EMAIL", "pylabhavyasree1@gmail.com"],
+            ].map(([label, val], i) => (
+              <div key={i} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "0.6rem 0",
+                borderBottom: i < 3 ? "1px solid rgba(201,168,124,0.04)" : "none",
+              }}>
+                <span style={{ color: "#5a5a5a", fontSize: "0.5rem", fontFamily: "monospace", letterSpacing: "0.15em" }}>{label}</span>
+                <span style={{ color: label === "EMAIL" ? "#c9a87c" : "#8a8580", fontSize: "0.6rem",
+                  fontFamily: "monospace", letterSpacing: "0.05em", textAlign: "right" }}>{val}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: "1.5rem", display: "flex", gap: "1.5rem" }}>
+              {[["https://github.com/bhavyasreepyla","GITHUB"],["https://linkedin.com/in/bhavyasreepyla","LINKEDIN"]].map(([h,l]) => (
+                <a key={l} data-hover href={h} target="_blank" rel="noopener noreferrer"
+                  style={{ color: "#5a5a5a", fontSize: "0.5rem", fontFamily: "monospace",
+                    letterSpacing: "0.15em", textDecoration: "none", transition: "color 0.3s" }}
+                  onMouseEnter={e=>e.target.style.color="#c9a87c"}
+                  onMouseLeave={e=>e.target.style.color="#5a5a5a"}>{l} ↗</a>
+              ))}
+            </div>
+          </motion.div>
+        </div>
       </div>
 
+      {/* darkroom bars — client-only rendered */}
+      <div style={{ position: "relative", padding: "3rem clamp(2rem, 6vw, 8rem)", overflow: "hidden" }}>
+        {bars.length > 0 && (
+          <div style={{ position: "absolute", inset: 0, overflow: "hidden", opacity: 0.12, pointerEvents: "none" }}>
+            {bars.map((bar, i) => (
+              <div key={i} style={{
+                position: "absolute", left: bar.left, top: 0, bottom: 0,
+                width: bar.width, background: "#c9a87c", opacity: bar.opacity,
+                animation: `barPulse ${bar.dur}s ease-in-out ${bar.delay}s infinite alternate`,
+              }} />
+            ))}
+          </div>
+        )}
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto",
+          display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem",
+          borderTop: "1px solid rgba(201,168,124,0.06)", paddingTop: "2rem" }}>
+          <span style={{ color: "#2a2520", fontSize: "0.5rem", fontFamily: "monospace", letterSpacing: "0.15em" }}>© 2026 BHAVYA SREE PYLA</span>
+          <span style={{ color: "#2a2520", fontSize: "0.5rem", fontFamily: "monospace", letterSpacing: "0.15em" }}>DESIGNED & BUILT WITH CARE</span>
+          <span style={{ color: "#2a2520", fontSize: "0.5rem", fontFamily: "monospace", letterSpacing: "0.15em" }}>ALL RIGHTS RESERVED</span>
+        </div>
+      </div>
       <style jsx>{`
-        @keyframes startravel {
-          0% {
-            transform: translateY(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: 0.7;
-          }
-          90% {
-            opacity: 0.7;
-          }
-          100% {
-            transform: translateY(calc(100vh + 50px));
-            opacity: 0;
-          }
-        }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes barPulse { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1); } }
       `}</style>
     </section>
   );

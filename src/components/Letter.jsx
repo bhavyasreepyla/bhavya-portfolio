@@ -1,132 +1,66 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+
+const LINES = [
+  { text: "You're probably here because you're trying to understand who I am beyond bullet points and project descriptions." },
+  { text: "I value clarity, honesty, and doing work that actually matters.", highlight: "I care about impact, thoughtfulness, and responsibility." },
+  { text: "I'm still learning, still growing, and still figuring out what kind of engineer and researcher I want to become. But I know I want to work on problems that require both technical depth and human understanding." },
+  { text: "If that resonates with you, I'd love to talk.", isAccent: true },
+];
 
 export default function Letter() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"], layoutEffect: false });
+  const lineW = useTransform(scrollYProgress, [0.2, 0.5], ["0%", "100%"]);
+
   return (
-    <section 
-      id="Letter"
-      className="relative min-h-screen flex items-center justify-center px-6 md:px-16 py-20 overflow-hidden"
-      style={{ background: 'linear-gradient(to bottom, #000000, #0a0a0a)' }}
-    >
-      {/* SPACE TRAVEL STARS */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        {[0,8,16,24,32,40,48,56,64,72,80,88].map((left) => (
-          <div
-            key={left}
-            style={{
-              position: 'absolute',
-              left: `${left}%`,
-              top: '-50px',
-              width: '3px',
-              height: '3px',
-              background: 'linear-gradient(to bottom, transparent, white, transparent)',
-              animation: 'startravel 4s linear infinite',
-              animationDelay: `${left * 0.1}s`,
-              boxShadow: '0 0 6px rgba(255,255,255,0.8)',
-              opacity: 0.7
-            }}
-          />
+    <section id="Letter" ref={ref} style={{
+      position: "relative", padding: "6rem clamp(2rem, 8vw, 10rem)",
+      background: "#0a0a0a", overflow: "hidden",
+    }}>
+      {/* accent glow */}
+      <div style={{ position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)",
+        width: "40vw", height: "40vw", background: "radial-gradient(circle, rgba(201,168,124,0.025), transparent 60%)",
+        filter: "blur(60px)", pointerEvents: "none" }} />
+
+      <div style={{ maxWidth: 650, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        {/* animated decorative line */}
+        <motion.div style={{ width: lineW, height: 1, marginBottom: "3rem", margin: "0 auto 3rem",
+          background: "linear-gradient(to right, transparent, rgba(201,168,124,0.3), transparent)" }} />
+
+        <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }} viewport={{ once: true }}
+          style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.5rem)", fontWeight: 900, color: "#f5f0eb",
+            textAlign: "center", marginBottom: "2.5rem", letterSpacing: "-0.03em" }}>
+          If You're Reading This<span style={{ color: "#c9a87c" }}>.</span>
+        </motion.h2>
+
+        {/* staggered word reveal */}
+        {LINES.map((line, i) => (
+          <motion.div key={i}
+            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22,1,0.36,1] }}
+            viewport={{ once: true, margin: "-40px" }}
+            style={{ marginBottom: i < LINES.length - 1 ? "1.5rem" : 0, textAlign: "center" }}
+          >
+            {line.isAccent ? (
+              <p style={{ fontSize: "clamp(1.1rem, 1.6vw, 1.3rem)", color: "#c9a87c", fontWeight: 600, lineHeight: 1.7 }}>
+                {line.text}
+              </p>
+            ) : (
+              <p style={{ fontSize: "clamp(0.95rem, 1.3vw, 1.05rem)", color: "#c8c3be", lineHeight: 1.85 }}>
+                {line.text}{line.highlight && <span style={{ color: "#c9a87c", fontWeight: 600 }}>{" "}{line.highlight}</span>}
+              </p>
+            )}
+          </motion.div>
         ))}
+
+        {/* animated closing line */}
+        <motion.div style={{ width: lineW, height: 1, marginTop: "3rem", margin: "3rem auto 0",
+          background: "linear-gradient(to right, transparent, rgba(201,168,124,0.3), transparent)" }} />
       </div>
-
-      <div className="relative z-10 max-w-3xl mx-auto w-full">
-        
-        {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <motion.h2 
-            className="text-4xl md:text-5xl font-black mb-4"
-            style={{
-              color: '#3b82f6',
-            }}
-          >
-            If You're Reading This
-          </motion.h2>
-        </motion.div>
-
-        {/* Letter content */}
-        <div className="space-y-8">
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-xl md:text-2xl text-gray-300 leading-relaxed text-center"
-          >
-            You're probably here because you're trying to understand who I am beyond bullet points and project descriptions.
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="text-xl md:text-2xl text-gray-300 leading-relaxed text-center"
-          >
-            I value clarity, honesty, and doing work that actually matters to people. I'm not interested in building things just because they're technically impressive — I care about <span className="text-blue-400 font-semibold">impact, thoughtfulness, and responsibility</span>.
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            viewport={{ once: true }}
-            className="text-xl md:text-2xl text-gray-300 leading-relaxed text-center"
-          >
-            I'm still learning, still growing, and still figuring out what kind of engineer and researcher I want to become. But I know I want to work on problems that require both technical depth and human understanding.
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            viewport={{ once: true }}
-            className="text-xl md:text-2xl text-blue-400 leading-relaxed text-center font-medium"
-          >
-            If that resonates with you, I'd love to talk.
-          </motion.p>
-
-        </div>
-
-        {/* Subtle divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          transition={{ duration: 1, delay: 1 }}
-          viewport={{ once: true }}
-          style={{
-            height: '1px',
-            background: 'linear-gradient(to right, transparent, rgba(59, 130, 246, 0.3), transparent)',
-            marginTop: '4rem',
-          }}
-        />
-
-      </div>
-
-      <style jsx>{`
-        @keyframes startravel {
-          0% {
-            transform: translateY(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: 0.7;
-          }
-          90% {
-            opacity: 0.7;
-          }
-          100% {
-            transform: translateY(calc(100vh + 50px));
-            opacity: 0;
-          }
-        }
-      `}</style>
     </section>
   );
 }

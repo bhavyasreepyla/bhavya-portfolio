@@ -1,366 +1,156 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef, useState } from "react";
+import NameReveal from "./NameReveal";
 
 export default function Hero() {
-  const [showName, setShowName] = useState(true);
-  const [showHero, setShowHero] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [ready, setReady] = useState(false);
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"], layoutEffect: false });
+  const yTitle = useTransform(scrollYProgress, [0, 0.5], [0, -180]);
+  const opTitle = useTransform(scrollYProgress, [0, 0.35], [1, 0]);
+  const gridOp = useTransform(scrollYProgress, [0, 0.3], [0.5, 0]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowName(false);
-      setTimeout(() => setShowHero(true), 1000);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+  // BSP: starts large, shrinks to nav size, stays fully visible
+  const bspSize = useTransform(scrollYProgress, [0, 0.15], ["clamp(1.8rem, 3.5vw, 3rem)", "clamp(0.8rem, 1.2vw, 1rem)"]);
+  const bspWeight = useTransform(scrollYProgress, [0, 0.15], [900, 700]);
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX - window.innerWidth / 2) / 50,
-        y: (e.clientY - window.innerHeight / 2) / 50
-      });
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  const scrollToSection = (id) => {
-    setMenuOpen(false);
-    setTimeout(() => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 300);
-  };
-
-  const name = "BHAVYA";
-  const letters = name.split("");
+  const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <>
-    <AnimatePresence>
-  {showName && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#000000'
-      }}
-    >
-      <div style={{ display: 'flex', gap: '0.2rem' }}>
-        {letters.map((letter, i) => (
-          <motion.span
-            key={i}
-            initial={{ opacity: 0, scaleY: 0 }}
-            animate={{ opacity: 1, scaleY: 1 }}
-            exit={{ 
-              scaleY: 0,
-              opacity: 0,
-            }}
-            transition={{
-              initial: { duration: 0.5, delay: i * 0.15 },
-              exit: { duration: 0.4, delay: i * 0.05 }
-            }}
-            className="font-black"
-            style={{
-              fontSize: 'clamp(6rem, 20vw, 24rem)',
-              background: 'linear-gradient(to right, #1e3a8a, #1e40af, #1e3a8a)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              display: 'inline-block',
-              transformOrigin: 'center',
-              lineHeight: 1
-            }}
-          >
-            {letter}
-          </motion.span>
-        ))}
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
+      {!ready && <NameReveal onComplete={() => setReady(true)} />}
 
-      {showHero && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            style={{ position: 'fixed', top: '2rem', left: '2rem', zIndex: 40 }}
-            className="text-gray-500 text-xs tracking-wider"
-          >
-            Building intelligent systems, one line at a time
-          </motion.div>
-
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            onClick={() => setMenuOpen(!menuOpen)}
-            style={{ 
-              position: 'fixed', 
-              top: '2rem', 
-              right: '2rem', 
-              zIndex: 50,
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <span style={{
-              display: 'block',
-              width: '28px',
-              height: '2.5px',
-              backgroundColor: '#d1d5db',
-              transition: 'all 0.3s ease',
-              transform: menuOpen ? 'rotate(45deg) translateY(8.5px)' : 'none',
-              transformOrigin: 'center'
-            }}></span>
-            <span style={{
-              display: 'block',
-              width: '28px',
-              height: '2.5px',
-              backgroundColor: '#d1d5db',
-              transition: 'all 0.3s ease',
-              opacity: menuOpen ? 0 : 1
-            }}></span>
-            <span style={{
-              display: 'block',
-              width: '28px',
-              height: '2.5px',
-              backgroundColor: '#d1d5db',
-              transition: 'all 0.3s ease',
-              transform: menuOpen ? 'rotate(-45deg) translateY(-8.5px)' : 'none',
-              transformOrigin: 'center'
-            }}></span>
-          </motion.button>
-
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 25 }}
-                style={{
-                  position: 'fixed',
-                  right: 0,
-                  top: 0,
-                  height: '100vh',
-                  width: '384px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.98)',
-                  backdropFilter: 'blur(20px)',
-                  zIndex: 40,
-                  padding: '4rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  borderLeft: '1px solid rgba(59, 130, 246, 0.1)'
-                }}
-              >
-                <div style={{ marginBottom: '4rem' }}>
-                  <p style={{ color: '#6b7280', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '2rem', fontWeight: 500 }}>NAVIGATION</p>
-                  <button onClick={() => scrollToSection('Hero')} style={{ display: 'block', fontSize: '1.875rem', fontWeight: 'bold', color: 'white', marginBottom: '1.5rem', background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', transition: 'color 0.3s', width: '100%' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = 'white'}>Home</button>
-                  <button onClick={() => scrollToSection('HowIThink')} style={{ display: 'block', fontSize: '1.875rem', fontWeight: 'bold', color: 'white', marginBottom: '1.5rem', background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', transition: 'color 0.3s', width: '100%' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = 'white'}>How I Think</button>
-                  <button onClick={() => scrollToSection('WhatIBuild')} style={{ display: 'block', fontSize: '1.875rem', fontWeight: 'bold', color: 'white', marginBottom: '1.5rem', background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', transition: 'color 0.3s', width: '100%' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = 'white'}>What I Build</button>
-                  <button onClick={() => scrollToSection('BeyondCode')} style={{ display: 'block', fontSize: '1.875rem', fontWeight: 'bold', color: 'white', marginBottom: '1.5rem', background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', transition: 'color 0.3s', width: '100%' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = 'white'}>Beyond Code</button>
-                  <button onClick={() => scrollToSection('Contact')} style={{ display: 'block', fontSize: '1.875rem', fontWeight: 'bold', color: 'white', background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', transition: 'color 0.3s', width: '100%' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = 'white'}>Contact</button>
-                </div>
-                <div>
-                  <p style={{ color: '#6b7280', fontSize: '0.75rem', letterSpacing: '0.1em', marginBottom: '1.5rem', fontWeight: 500 }}>CONNECT</p>
-                  <a href="https://github.com/bhavyasreepyla" target="_blank" rel="noopener noreferrer" style={{ display: 'block', fontSize: '1.125rem', color: '#9ca3af', marginBottom: '0.75rem', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = '#9ca3af'}>GitHub →</a>
-                  <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer" style={{ display: 'block', fontSize: '1.125rem', color: '#9ca3af', marginBottom: '0.75rem', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = '#9ca3af'}>LinkedIn →</a>
-                  <a href="mailto:pylabhavyasree1@gmail.com" style={{ display: 'block', fontSize: '1.125rem', color: '#9ca3af', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.target.style.color = '#60a5fa'} onMouseLeave={(e) => e.target.style.color = '#9ca3af'}>Email →</a>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
-      )}
-
-      <motion.section 
-        id="Hero"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: showHero ? 1 : 0 }}
-        transition={{ duration: 1 }}
-        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6" 
-        style={{ 
-          background: 'linear-gradient(to bottom right, rgba(9, 15, 98, 0.2), #0000002e, #00000072)',
-          transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
-          transition: 'transform 0.5s ease-out'
-        }}
-      >
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-          {[0,8,16,24,32,40,48,56,64,72,80,88].map((left) => (
-            <div
-              key={left}
-              style={{
-                position: 'absolute',
-                left: `${left}%`,
-                top: '-50px',
-                width: '3px',
-                height: '3px',
-                background: 'linear-gradient(to bottom, transparent, white, transparent)',
-                animation: 'startravel 4s linear infinite',
-                animationDelay: `${left * 0.1}s`,
-                boxShadow: '0 0 6px rgba(255,255,255,0.8)',
-                opacity: 0.7
-              }}
-            />
+      <motion.nav initial={{ opacity: 0 }} animate={{ opacity: ready ? 1 : 0 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 40,
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "1.2rem clamp(1.5rem, 4vw, 3rem)",
+          background: "linear-gradient(to bottom, rgba(10,10,10,0.9) 0%, transparent 100%)",
+          pointerEvents: ready ? "auto" : "none" }}>
+        <motion.span data-hover onClick={() => go("Hero")}
+          style={{ fontSize: bspSize, fontWeight: bspWeight, color: "#f5f0eb",
+            letterSpacing: "-0.03em", cursor: "pointer", whiteSpace: "nowrap" }}>
+          BSP<span style={{ color: "#c9a87c" }}>.</span>
+        </motion.span>
+        <div style={{ display: "flex", gap: "2rem" }}>
+          {[["WhatIBuild","Work"],["BeyondCode","Story"],["Contact","Contact"]].map(([id,l])=>(
+            <span key={id} data-hover onClick={() => go(id)}
+              style={{ color: "#8a8580", fontSize: "0.55rem", letterSpacing: "0.15em",
+                textTransform: "uppercase", fontFamily: "monospace", cursor: "pointer", transition: "color 0.3s" }}
+              onMouseEnter={e=>e.target.style.color="#c9a87c"}
+              onMouseLeave={e=>e.target.style.color="#8a8580"}>{l}</span>
           ))}
         </div>
-        
-        <div className="relative z-10 text-center max-w-6xl">
-          
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.6, delay: 0.2 }} 
-            className="font-medium mb-4 tracking-widest uppercase text-sm"
-            style={{ color: '#60a5fa' }}
-          >
-            AI ENGINEER · BUILDER · DANCER
-          </motion.p>
+      </motion.nav>
 
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8, delay: 0.4 }} 
-            className="font-black mb-6 leading-tight"
-            style={{ 
-              fontSize: 'clamp(4rem, 10vw, 12rem)',
-              background: 'linear-gradient(to right, #ffffff, #d1d5db, #ffffff)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}
-          >
-            Bhavya Sree Pyla
-          </motion.h1>
+      <section id="Hero" ref={ref} style={{ position: "relative", minHeight: "100vh",
+        display: "flex", alignItems: "center", overflow: "hidden", background: "#0a0a0a" }}>
 
-          <motion.p 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8, delay: 0.6 }} 
-            className="text-xl md:text-3xl text-gray-400 mb-8 max-w-4xl mx-auto font-light leading-relaxed"
-          >
-            I build AI systems that actually work for humans-
-            <span 
-              className="font-medium"
-              style={{ 
-                background: 'linear-gradient(to right, #3b82f6, #60a5fa, #3b82f6)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
-              {" "}where logic meets intuition
-            </span>
-          </motion.p>
+        {/* atmospheric bg */}
+        <div style={{ position: "absolute", inset: 0,
+          background: "radial-gradient(ellipse at 70% 15%, rgba(201,168,124,0.07), transparent 50%), radial-gradient(ellipse at 10% 85%, rgba(201,168,124,0.04), transparent 45%), radial-gradient(ellipse at 85% 75%, rgba(120,100,80,0.03), transparent 40%)",
+          backgroundSize: "200% 200%", animation: "meshShift 25s ease infinite" }} />
+        {/* light beam */}
+        <div style={{ position: "absolute", top: 0, left: "55%", width: 1, height: "100%",
+          background: "linear-gradient(to bottom, transparent 0%, rgba(201,168,124,0.08) 30%, rgba(201,168,124,0.08) 70%, transparent 100%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: 0, left: "55%", width: 200, height: "100%", transform: "translateX(-100px)",
+          background: "linear-gradient(to bottom, transparent 10%, rgba(201,168,124,0.015) 40%, rgba(201,168,124,0.015) 60%, transparent 90%)",
+          pointerEvents: "none", filter: "blur(30px)" }} />
+        {/* grid */}
+        <motion.div style={{ opacity: gridOp, position: "absolute", bottom: 0, left: "-20%", width: "140%", height: "50%",
+          transform: "perspective(500px) rotateX(60deg)", transformOrigin: "bottom center",
+          backgroundImage: "linear-gradient(rgba(201,168,124,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,124,0.035) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
+          maskImage: "linear-gradient(to top, black 20%, transparent)", WebkitMaskImage: "linear-gradient(to top, black 20%, transparent)", pointerEvents: "none" }} />
+        {/* orbs */}
+        <div style={{ position: "absolute", top: "8%", right: "10%", width: 350, height: 350, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(201,168,124,0.05), transparent 60%)", filter: "blur(50px)",
+          animation: "floatA 18s ease-in-out infinite", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: "15%", left: "5%", width: 200, height: 200, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(201,168,124,0.03), transparent 60%)", filter: "blur(40px)",
+          animation: "floatB 22s ease-in-out infinite", pointerEvents: "none" }} />
+        {/* scan */}
+        <div style={{ position: "absolute", left: 0, right: 0, height: 1,
+          background: "linear-gradient(to right, transparent, rgba(201,168,124,0.06), transparent)",
+          animation: "scanDown 10s linear infinite", pointerEvents: "none" }} />
+        {/* corners */}
+        {[[0,0],[0,1],[1,0],[1,1]].map(([v,h],i) => (
+          <div key={i} style={{ position: "absolute", width: 35, height: 35, pointerEvents: "none",
+            ...(v===0?{top:24}:{bottom:24}), ...(h===0?{left:24}:{right:24}),
+            borderColor: "rgba(201,168,124,0.08)", borderStyle: "solid", borderWidth: 0,
+            ...(v===0?{borderTopWidth:1}:{borderBottomWidth:1}), ...(h===0?{borderLeftWidth:1}:{borderRightWidth:1}) }} />
+        ))}
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-lg md:text-xl text-gray-500 mb-12 max-w-2xl mx-auto"
-          >
-            When I'm in my element coding, solving, building nothing else exists.<br className="hidden md:block" />That rush? That's where I live.
-          </motion.p>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8, delay: 1 }} 
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
-          >
-            <button 
-              onClick={() => scrollToSection('HowIThink')}
-              className="group relative px-10 py-5 text-white font-bold text-lg rounded-xl transition-all duration-300 hover:scale-105 overflow-hidden"
-              style={{ 
-                background: 'linear-gradient(to right, #3b82f6, #2563eb)',
-                boxShadow: '0 10px 40px rgba(59, 130, 246, 0.4)', 
-                border: 'none', 
-                cursor: 'pointer' 
-              }}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                See how I think
-                <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
-              </span>
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(to right, #2563eb, #1d4ed8)',
-                opacity: 0,
-                transition: 'opacity 0.3s'
-              }} className="group-hover:opacity-100"></div>
-            </button>
-            
-            <button 
-              onClick={() => scrollToSection('Contact')}
-              className="group px-10 py-5 text-white font-bold text-lg rounded-xl transition-all duration-300 hover:scale-105 relative overflow-hidden"
-              style={{ 
-                border: '2px solid rgba(59, 130, 246, 0.4)',
-                background: 'rgba(59, 130, 246, 0.05)',
-                cursor: 'pointer'
-              }}
-            >
-              <span className="relative z-10">Let's talk</span>
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2))',
-                opacity: 0,
-                transition: 'opacity 0.3s'
-              }} className="group-hover:opacity-100"></div>
-            </button>
+        {/* content */}
+        <motion.div style={{ y: yTitle, opacity: opTitle, position: "relative", zIndex: 2,
+          padding: "0 clamp(2rem, 8vw, 10rem)", width: "100%" }}>
+          <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: ready?1:0, x: ready?0:-30 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
+            <div style={{ width: 50, height: 1, background: "linear-gradient(to right, #c9a87c, transparent)" }} />
+            <span style={{ color: "#c9a87c", fontSize: "0.6rem", letterSpacing: "0.4em", textTransform: "uppercase", fontFamily: "monospace" }}>
+              AI Engineer · Builder · Dancer</span>
           </motion.div>
+          <motion.h1 initial={{ opacity: 0, y: 60 }} animate={{ opacity: ready?1:0, y: ready?0:60 }}
+            transition={{ duration: 1, delay: 0.6, ease: [0.22,1,0.36,1] }}
+            style={{ fontSize: "clamp(3.5rem, 12vw, 14rem)", fontWeight: 900, lineHeight: 0.85,
+              letterSpacing: "-0.05em", marginBottom: "2rem", color: "#f5f0eb" }}>
+            Bhavya<br/><span style={{ color: "rgba(245,240,235,0.4)" }}>Sree Pyla</span><span style={{ color: "#c9a87c" }}>.</span>
+          </motion.h1>
+          <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: ready?1:0, y: ready?0:30 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            style={{ fontSize: "clamp(1rem, 1.8vw, 1.3rem)", color: "#8a8580", maxWidth: 500, lineHeight: 1.65, fontWeight: 300, marginBottom: "1rem" }}>
+            I build AI systems that actually work for humans—where <span style={{ color: "#c9a87c", fontWeight: 500 }}>logic meets intuition</span>.
+          </motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: ready?1:0 }} transition={{ duration: 0.8, delay: 1.2 }}
+            style={{ fontSize: "0.75rem", color: "#5a5a5a", fontFamily: "monospace", letterSpacing: "0.05em", marginBottom: "3rem" }}>
+            MS Artificial Intelligence — Northeastern University, Portland ME</motion.p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: ready?1:0, y: ready?0:20 }}
+            transition={{ duration: 0.8, delay: 1.4 }} style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            <button data-hover onClick={() => go("WhatIBuild")} style={{
+              padding: "1rem 2.5rem", fontSize: "0.7rem", fontWeight: 700, color: "#0a0a0a",
+              background: "#c9a87c", border: "none", borderRadius: 6, fontFamily: "monospace",
+              letterSpacing: "0.15em", textTransform: "uppercase", transition: "transform 0.2s, box-shadow 0.2s",
+              boxShadow: "0 8px 30px rgba(201,168,124,0.2)" }}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 12px 40px rgba(201,168,124,0.35)"}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 8px 30px rgba(201,168,124,0.2)"}}
+            >See My Work →</button>
+            <button data-hover onClick={() => go("Contact")} style={{
+              padding: "1rem 2.5rem", fontSize: "0.7rem", fontWeight: 700, color: "#8a8580",
+              background: "transparent", border: "1px solid rgba(201,168,124,0.2)", borderRadius: 6,
+              fontFamily: "monospace", letterSpacing: "0.15em", textTransform: "uppercase", transition: "all 0.3s" }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(201,168,124,0.5)";e.currentTarget.style.color="#f5f0eb"}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(201,168,124,0.2)";e.currentTarget.style.color="#8a8580"}}
+            >Get in Touch</button>
+          </motion.div>
+        </motion.div>
 
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: ready?1:0 }} transition={{ delay: 2.5 }}
+          style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: "0.45rem", letterSpacing: "0.35em", color: "#5a5a5a", fontFamily: "monospace", textTransform: "uppercase" }}>Scroll</span>
+          <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            style={{ width: 1, height: 30, background: "linear-gradient(to bottom, #5a5a5a, transparent)" }} />
+        </motion.div>
+      </section>
+
+      <div style={{ overflow: "hidden", padding: "1.5rem 0", borderTop: "1px solid rgba(201,168,124,0.06)",
+        borderBottom: "1px solid rgba(201,168,124,0.06)", background: "rgba(201,168,124,0.01)" }}>
+        <div style={{ display: "flex", whiteSpace: "nowrap", width: "max-content", animation: "marquee 35s linear infinite" }}>
+          {[0,1].map(k=>(<span key={k} style={{ fontSize: "0.65rem", color: "#3a3530", fontWeight: 700,
+            letterSpacing: "0.4em", paddingRight: "4rem", fontFamily: "monospace" }}>
+            AI ENGINEER • DEEP LEARNING • COMPUTER VISION • NLP • RECOMMENDER SYSTEMS • BHARATANATYAM • BUILDER • RESEARCHER •{" "}</span>))}
         </div>
+      </div>
 
-      </motion.section>
-
-      <style jsx>{`
-        @keyframes startravel {
-          0% {
-            transform: translateY(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: 0.7;
-          }
-          90% {
-            opacity: 0.7;
-          }
-          100% {
-            transform: translateY(calc(100vh + 50px));
-            opacity: 0;
-          }
-        }
+      <style jsx global>{`
+        @keyframes meshShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes floatA { 0%,100% { transform: translate(0,0); } 50% { transform: translate(20px,-30px); } }
+        @keyframes floatB { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-15px,25px); } }
+        @keyframes scanDown { 0% { top: -1px; } 100% { top: 100%; } }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes marqueeR { from { transform: translateX(-50%); } to { transform: translateX(0); } }
       `}</style>
     </>
   );
