@@ -98,7 +98,7 @@ export default function Letter() {
             <motion.div style={{ width: lineW, height: 1, margin: "0 auto 2rem",
               background: "linear-gradient(to right, transparent, rgba(201,168,124,0.3), transparent)" }} />
             <p className="serif-italic" style={{ fontSize: "1.6rem", color: "var(--ember)", marginBottom: "0.4rem" }}>
-              — Bhavya
+              Bhavya
             </p>
             <p className="numeral" style={{ letterSpacing: "0.3em" }}>భవ్య · भव्या</p>
           </motion.div>

@@ -13,7 +13,7 @@ const EXPERIENCE = [
     period: "JAN 2025 → AUG 2025",
     role: "Artificial Intelligence Intern",
     org: "RUBUS DIGITAL · HYDERABAD, INDIA",
-    desc: "Cut inference latency by 20% and boosted real-time processing efficiency; built scalable multi-camera analytics pipelines that improved object-tracking reliability and ID accuracy by 25%; fine-tuned models across diverse lighting and traffic scenarios and hardened end-to-end ANPR systems for large-scale deployment.",
+    desc: "Drove end-to-end ANPR (automatic number-plate recognition) systems toward large-scale surveillance deployment, partnering with engineering teams to strengthen and streamline the full pipeline. Built scalable multi-camera analytics that raised tracking reliability and ID accuracy by 25%, and cut inference latency by 20% for real-time processing across varied lighting and traffic conditions.",
     tags: ["Object Detection", "ANPR", "Inference Optimization"],
   },
   {

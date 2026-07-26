@@ -125,7 +125,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.9 }}
             style={{ fontSize: "clamp(1rem, 1.5vw, 1.2rem)", color: "var(--muted)", maxWidth: 520,
               lineHeight: 1.7, fontWeight: 300, marginBottom: "0.9rem" }}>
-            I build AI systems that actually work for humans —{" "}
+            Engineering intelligence from idea to impact,{" "}
             <span className="serif-italic" style={{ color: "var(--cream)", fontSize: "1.08em" }}>
               where logic meets intuition
             </span>.

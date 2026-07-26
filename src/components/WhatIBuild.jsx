@@ -4,7 +4,6 @@ import {
   useTransform, useAnimationFrame, useInView,
 } from "framer-motion";
 import { useState, useRef, useCallback } from "react";
-import DescentGame from "./DescentGame";
 
 const wrap = (min, max, v) => min + (((v - min) % (max - min)) + (max - min)) % (max - min);
 
@@ -260,9 +259,9 @@ export default function WhatIBuild() {
           </h2>
           <p style={{ fontSize: "0.95rem", color: "var(--muted)", maxWidth: 460, lineHeight: 1.7,
             fontWeight: 300, marginBottom: "2rem" }}>
-            AI that solves real problems.{" "}
+            Systems that think, learn, and create value.{" "}
             <span className="serif-italic" style={{ color: "var(--faint)" }}>
-              Hover a project (or tap, on touch) and the real story is underneath.
+              Hover a project (or tap, on touch).
             </span>
           </p>
         </motion.div>
@@ -288,10 +287,6 @@ export default function WhatIBuild() {
           </button>
         </div>
 
-        {/* the playground: gradient descent, but you hold the learning rate */}
-        <div style={{ textAlign: "center", marginTop: "1.4rem" }}>
-          <DescentGame />
-        </div>
       </div>
     </section>
   );

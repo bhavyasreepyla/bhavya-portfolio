@@ -97,29 +97,20 @@ only on cards. Rules:
   particles within 200px warm to gold, pairs within 110px link with hairlines.
 - `prefers-reduced-motion`: particles freeze in place (still drawn, no drift).
 
-## The Game (Descent)
+## The Game (CAREER.EXE)
 
-`DescentGame.jsx` — the portfolio's game mode, triggered from a small
-mono button under the Work section's project list. A procedurally
-generated loss landscape (glowing gold curve, new every run); the ball
-runs gradient descent on its own and the player controls only the
-learning rate (↑/↓, or touch buttons). Too low: trapped in a local
-minimum. Too high: the gradient explodes in ember sparks. Converge at
-the global minimum in the fewest steps; best run persists in
-localStorage (`bsp-descent-best`). Styled like everything else: Surface
-panel, hairline borders, mono labels, gold curve, cream ball, ember for
-failure. There is deliberately NO dancer figure anywhere on the site
-(every figurative attempt was retired); the dance heritage lives in the
-copy, the scripts, and the motion language instead. The name reveal
-plays once per session (`sessionStorage: bsp-revealed`); returning
-visitors land directly on the hero.
-
-The headline game mode is CAREER.EXE (`GameMode.jsx`), launched from the
+The site's game mode is CAREER.EXE (`GameMode.jsx`), launched from the
 blinking green "GAME MODE" button under the nav wordmark. It is a
 green-on-black pixel platformer built over her real milestones, from high
-school through twelve years of Bharatanatyam, and it always ends with an
-employability score of 100/100. Terminal green (`#00ff66`) exists only
-inside game surfaces, never in the manuscript UI.
+school through the biomedicine research assistantship, and it always ends
+with an employability score of 100/100. Terminal green (`#00ff66`) exists
+only inside game surfaces, never in the manuscript UI.
+
+There is deliberately NO dancer figure anywhere on the site (every
+figurative attempt was retired); the dance heritage lives in the copy,
+the scripts, and the motion language instead. The name reveal plays once
+per session (`sessionStorage: bsp-revealed`); returning visitors land
+directly on the hero.
 
 ## The Script Motif
 
