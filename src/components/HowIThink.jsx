@@ -1,114 +1,192 @@
 "use client";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
 
 const ITEMS = [
-  { n: "01", title: "User experience", sub: "over metrics", desc: "Numbers lie. The person using your system never does." },
-  { n: "02", title: "Simplicity", sub: "over complexity", desc: "If you can't explain it simply, you don't understand it deeply enough." },
-  { n: "03", title: "AI amplifies", sub: "not replaces", desc: "The best systems make humans more capable, not more replaceable." },
-  { n: "04", title: "Endurance", sub: "over excuses", desc: "Talent gets you started. Showing up every single day gets you there." },
+  {
+    n: "01", alt: "०१", title: "User experience", sub: "over metrics",
+    desc: "Numbers lie. The person using your system never does.",
+    note: "Vision-to-Speech: built for people who'd never see the UI",
+  },
+  {
+    n: "02", alt: "౦౨", title: "Simplicity", sub: "over complexity",
+    desc: "If you can't explain it simply, you don't understand it deeply enough.",
+    note: "Hybrid Recommender: the simplest model won",
+  },
+  {
+    n: "03", alt: "٠٣", title: "AI amplifies", sub: "not replaces",
+    desc: "The best systems make humans more capable, not more replaceable.",
+    note: "Number Plate Detection: an officer's whole day, automated",
+  },
+  {
+    n: "04", alt: "೦೪", title: "Endurance", sub: "over excuses",
+    desc: "Talent gets you started. Showing up every single day gets you there.",
+    note: "Bharatanatyam: the same adavu, twelve years",
+  },
 ];
 
-/*
- * Each card tracks its own position relative to the viewport.
- * When it enters from the bottom → rotateX(35deg), scaled down, faded.
- * When it hits center → rotateX(0), full scale, full opacity.
- * When it exits top → rotateX(-35deg), scaled down, faded.
- * This creates the vertical "spine" / drum effect from at.mp4.
- */
-function SpineCard({ item, index }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-    layoutEffect: false,
-  });
+const STEP_VH = 115;           // scroll distance per drum step
+const ANGLE = 52;              // degrees between items on the drum
+const RADIUS = 44;             // drum radius in vh
 
-  // 0 = card entering from bottom, 0.5 = center of viewport, 1 = exiting top
-  const rotateX = useTransform(scrollYProgress, [0, 0.35, 0.5, 0.65, 1], [45, 10, 0, -10, -45]);
-  const scale = useTransform(scrollYProgress, [0, 0.35, 0.5, 0.65, 1], [0.7, 0.9, 1, 0.9, 0.7]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.5, 0.7, 1], [0, 0.7, 1, 0.7, 0]);
-  const z = useTransform(scrollYProgress, [0, 0.5, 1], [-150, 0, -150]);
+/*
+ * Active Theory "spine" — a vertical drum carousel.
+ * Every principle is mounted on the same 3D cylinder. Scroll rotates
+ * the drum: the next item rolls up from the bottom edge tilted back,
+ * unfolds flat at center, then folds away over the top. Neighbors stay
+ * visible at an angle above and below — that's the spine.
+ */
+function DrumItem({ item, i, total, progress }) {
+  // signed distance from the drum's focal position
+  const delta = useTransform(progress, (v) => i - v * (total - 1));
+
+  const rad = (d) => (d * ANGLE * Math.PI) / 180;
+  const y = useTransform(delta, (d) => `${Math.sin(rad(d)) * RADIUS}vh`);
+  const z = useTransform(delta, (d) => `${(Math.cos(rad(d)) - 1) * RADIUS}vh`);
+  const rotateX = useTransform(delta, (d) => -d * ANGLE);
+  const opacity = useTransform(delta, (d) => Math.max(0, 1 - Math.abs(d) * 0.5));
+  // details only exist at the focal plane
+  const detailOp = useTransform(delta, (d) => Math.max(0, 1 - Math.abs(d) * 2.4));
+  const ghostOp = useTransform(delta, (d) => Math.max(0, 0.5 - Math.abs(d) * 0.45));
 
   return (
-    <div ref={ref} style={{
-      height: "70vh", display: "flex", alignItems: "center", justifyContent: "center",
-      perspective: "1000px",
+    <motion.div style={{
+      position: "absolute", inset: 0,
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      y, z, rotateX, opacity,
+      transformStyle: "preserve-3d",
+      pointerEvents: "none", willChange: "transform, opacity",
     }}>
-      <motion.div
-        data-hover
-        style={{
-          rotateX, scale, opacity, z,
-          transformStyle: "preserve-3d",
-          width: "min(600px, 85vw)",
-          padding: "clamp(2rem, 4vw, 3.5rem)",
-          borderRadius: 20,
-          background: "rgba(201,168,124,0.025)",
-          border: "1px solid rgba(201,168,124,0.08)",
-          backdropFilter: "blur(6px)",
-          position: "relative", overflow: "hidden",
-          transformOrigin: "center center",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-        }}
-      >
-        {/* ghost number */}
-        <span style={{
-          position: "absolute", top: "0.5rem", right: "1.5rem",
-          fontSize: "clamp(5rem, 12vw, 10rem)", fontWeight: 900,
-          color: "transparent", WebkitTextStroke: "1px rgba(201,168,124,0.05)",
-          lineHeight: 1, pointerEvents: "none",
-        }}>{item.n}</span>
+      {/* ghost native-script numeral riding the same drum plate */}
+      <motion.span aria-hidden style={{ opacity: ghostOp,
+        position: "absolute", fontSize: "clamp(11rem, 34vw, 30rem)", fontWeight: 900,
+        lineHeight: 1, color: "transparent",
+        WebkitTextStroke: "1.5px rgba(201,168,124,0.13)",
+        transform: `translateX(${i % 2 === 0 ? "22vw" : "-22vw"})` }}>
+        {item.alt}
+      </motion.span>
 
-        <span style={{ color: "#c9a87c", fontSize: "0.6rem", fontFamily: "monospace",
-          letterSpacing: "0.25em", marginBottom: "1.2rem", display: "block" }}>({item.n})</span>
-        <h3 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900,
-          color: "#f5f0eb", letterSpacing: "-0.03em", lineHeight: 1.05, marginBottom: "0.3rem" }}>
-          {item.title}
-        </h3>
-        <p style={{ fontSize: "clamp(1.3rem, 2.5vw, 2rem)", fontWeight: 300,
-          color: "#c9a87c", marginBottom: "1.2rem", letterSpacing: "-0.02em" }}>
-          {item.sub}
-        </p>
-        <p style={{ fontSize: "0.85rem", color: "#8a8580", maxWidth: 420, lineHeight: 1.7 }}>
+      <span className="numeral" style={{ color: "var(--gold)", letterSpacing: "0.3em",
+        marginBottom: "1.4rem" }}>
+        ( {item.n} · {item.alt} )
+      </span>
+      <h3 style={{ fontWeight: 900, fontSize: "clamp(3rem, 8.5vw, 7.5rem)", lineHeight: 0.92,
+        letterSpacing: "-0.04em", color: "var(--cream)", marginBottom: "0.4rem", textAlign: "center" }}>
+        {item.title}
+      </h3>
+      <p className="serif-italic" style={{ fontSize: "clamp(1.8rem, 4.2vw, 3.6rem)",
+        color: "var(--gold)", letterSpacing: "-0.01em", marginBottom: "1.8rem", textAlign: "center" }}>
+        {item.sub}
+      </p>
+
+      <motion.div style={{ opacity: detailOp, textAlign: "center" }}>
+        <p style={{ fontSize: "clamp(0.9rem, 1.2vw, 1.05rem)", color: "var(--muted)",
+          maxWidth: 460, lineHeight: 1.75, fontWeight: 300, margin: "0 auto 1.1rem" }}>
           {item.desc}
         </p>
+        <p className="numeral" style={{ letterSpacing: "0.14em", color: "var(--faint)" }}>
+          <span style={{ color: "var(--gold)" }}>▸</span> FIELD-TESTED&nbsp;&nbsp;{item.note.toUpperCase()}
+        </p>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 
 export default function HowIThink() {
+  const ref = useRef(null);
+  const [active, setActive] = useState(0);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"], layoutEffect: false });
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    setActive(Math.max(0, Math.min(ITEMS.length - 1, Math.round(v * (ITEMS.length - 1)))));
+  });
+
+  const scrollCue = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
+
+  const stepTop = (i) => {
+    const sec = ref.current;
+    return sec.offsetTop + (i / (ITEMS.length - 1)) * (sec.offsetHeight - window.innerHeight);
+  };
+
+  const jumpTo = (i) => { if (ref.current) window.scrollTo({ top: stepTop(i), behavior: "smooth" }); };
+
+  // AT-style snap: when scrolling rests inside the drum, ease to the nearest step
+  useEffect(() => {
+    let t;
+    const onScroll = () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        const sec = ref.current;
+        if (!sec) return;
+        const span = sec.offsetHeight - window.innerHeight;
+        const local = window.scrollY - sec.offsetTop;
+        if (local < 0 || local > span) return;
+        const nearest = Math.round((local / span) * (ITEMS.length - 1));
+        const target = stepTop(nearest);
+        if (Math.abs(target - window.scrollY) > 4) {
+          window.scrollTo({ top: target, behavior: "smooth" });
+        }
+      }, 220);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { clearTimeout(t); window.removeEventListener("scroll", onScroll); };
+  }, []);
+
   return (
-    <section id="HowIThink" style={{
-      position: "relative", padding: "6rem clamp(2rem, 8vw, 10rem) 0",
-      background: "#0a0a0a", overflow: "hidden",
-    }}>
-      {/* ambient glow */}
-      <div style={{ position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)",
-        width: "50vw", height: "50vw", borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(201,168,124,0.03), transparent 60%)",
-        filter: "blur(60px)", pointerEvents: "none" }} />
+    <section id="HowIThink" ref={ref}
+      style={{ position: "relative", height: `${100 + (ITEMS.length - 1) * STEP_VH}vh` }}>
+      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden",
+        perspective: "1100px", perspectiveOrigin: "50% 50%" }}>
 
-      {/* heading — outside the scroll area, stays visible */}
-      <div style={{ maxWidth: 700, margin: "0 auto", position: "relative", zIndex: 1, marginBottom: "0" }}>
-        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }} viewport={{ once: true }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.8rem" }}>
-            <div style={{ width: 50, height: 1, background: "linear-gradient(to right, #c9a87c, transparent)" }} />
-            <span style={{ color: "#5a5a5a", fontSize: "0.55rem", letterSpacing: "0.3em", fontFamily: "monospace", textTransform: "uppercase" }}>PHILOSOPHY</span>
+        {/* drum edge fades — items roll out of darkness and back into it */}
+        <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none",
+          background: "linear-gradient(to bottom, rgba(12,9,6,0.88) 0%, transparent 22%, transparent 78%, rgba(12,9,6,0.88) 100%)" }} />
+
+        {/* pinned header — the counter is alive */}
+        <div style={{ position: "absolute", top: "5.5rem", left: "var(--gutter)", right: "var(--gutter)", zIndex: 3 }}>
+          <div className="section-head" style={{ marginBottom: 0 }}>
+            <div className="rule" />
+            <span className="label">Philosophy · How I Think</span>
+            <div className="dots" />
+            <span className="numeral" style={{ color: "var(--gold)" }}>
+              {ITEMS[active].n} <span style={{ color: "var(--faint)" }}>· {ITEMS[active].alt} / 04</span>
+            </span>
           </div>
-          <h2 style={{ fontSize: "clamp(3rem, 7vw, 7rem)", fontWeight: 900, lineHeight: 0.85,
-            letterSpacing: "-0.05em", color: "#f5f0eb" }}>
-            How I<br />Think<span style={{ color: "#c9a87c" }}>.</span>
-          </h2>
-        </motion.div>
-      </div>
+        </div>
 
-      {/* spine cards */}
-      <div style={{ position: "relative", zIndex: 1 }}>
-        {ITEMS.map((item, i) => (
-          <SpineCard key={item.n} item={item} index={i} />
-        ))}
+        {/* the drum */}
+        <div style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}>
+          {ITEMS.map((item, i) => (
+            <DrumItem key={item.n} item={item} i={i} total={ITEMS.length} progress={scrollYProgress} />
+          ))}
+        </div>
+
+        {/* clickable progress rail */}
+        <div className="hide-mobile" style={{ position: "absolute", right: "var(--gutter)", top: "50%",
+          transform: "translateY(-50%)", display: "flex", flexDirection: "column",
+          alignItems: "flex-end", gap: "1.1rem", zIndex: 3 }}>
+          {ITEMS.map((item, i) => (
+            <div key={item.n} data-hover onClick={() => jumpTo(i)}
+              style={{ display: "flex", alignItems: "center", gap: "0.7rem", cursor: "pointer",
+                padding: "0.2rem 0" }}>
+              <span className="numeral" style={{
+                color: i === active ? "var(--gold)" : "var(--faint)",
+                transition: "color 0.4s" }}>
+                {i === active ? item.title.toUpperCase() : item.n}
+              </span>
+              <div style={{ width: i === active ? 34 : 14, height: 1,
+                background: i === active ? "var(--gold)" : "var(--hairline)",
+                transition: "all 0.5s var(--settle)" }} />
+            </div>
+          ))}
+        </div>
+
+        {/* scroll cue — fades once the drum starts turning */}
+        <motion.div style={{ opacity: scrollCue, position: "absolute", bottom: "4.5rem", left: "50%",
+          transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: "0.6rem", zIndex: 3 }}>
+          <span className="numeral" style={{ letterSpacing: "0.35em" }}>KEEP SCROLLING</span>
+          <motion.span animate={{ y: [0, 5, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            className="numeral" style={{ color: "var(--gold)" }}>↓</motion.span>
+        </motion.div>
       </div>
     </section>
   );
