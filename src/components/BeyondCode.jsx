@@ -14,8 +14,11 @@ export default function BeyondCode() {
   const headingOp = useTransform(scrollYProgress, [0.18, 0.34], [1, 0]);
   const headingY = useTransform(scrollYProgress, [0, 0.34], [0, -110]);
 
-  const contentOp = useTransform(scrollYProgress, [0.34, 0.48], [0, 1]);
-  const contentY = useTransform(scrollYProgress, [0.34, 0.48], [60, 0]);
+  // hand off as the heading clears (~0.32), reach full brightness quickly,
+  // then HOLD it lit for the rest of the pin so the story is crisp at every
+  // natural reading position (no dim resting state)
+  const contentOp = useTransform(scrollYProgress, [0.3, 0.4], [0, 1]);
+  const contentY = useTransform(scrollYProgress, [0.3, 0.4], [40, 0]);
 
   return (
     <section id="BeyondCode" ref={ref} style={{
@@ -34,9 +37,9 @@ export default function BeyondCode() {
       </span>
 
       <div style={{
-        position: "sticky", top: 0, minHeight: "100vh",
+        position: "sticky", top: 0, height: "100vh", overflow: "hidden",
         display: "flex", alignItems: "center", justifyContent: "center",
-        flexDirection: "column", padding: "5rem var(--gutter) 2.5rem",
+        flexDirection: "column", padding: "7rem var(--gutter) 3rem",
       }}>
         <div className="section-head" style={{
           position: "absolute", top: "2.5rem", left: "var(--gutter)", right: "var(--gutter)",
@@ -64,11 +67,11 @@ export default function BeyondCode() {
         {/* SCENE 2: her words, verbatim, fading in beneath */}
         <motion.div style={{
           opacity: contentOp, y: contentY,
-          maxWidth: 760, width: "100%", position: "relative", zIndex: 1,
+          maxWidth: 620, width: "100%", position: "relative", zIndex: 1, margin: "0 auto",
         }}>
           {/* sized against viewport HEIGHT so the whole story always fits the pinned stage */}
-          <p style={{ fontSize: "clamp(0.8rem, 2.1vh, 1.08rem)", color: "#c8c3be",
-            lineHeight: 1.85, fontWeight: 300, textAlign: "justify" }}>
+          <p style={{ fontSize: "clamp(1rem, 2.5vh, 1.3rem)", color: "var(--cream)",
+            lineHeight: 1.6, fontWeight: 400, textAlign: "center" }}>
             Tanzania is my home. Not just where I lived — it&apos;s{" "}
             <span style={{ color: "var(--gold)", fontWeight: 500 }}>home</span>. Growing up
             there shaped everything about how I see the world. It gave me a global perspective,
@@ -82,7 +85,7 @@ export default function BeyondCode() {
             believe most problems can be worked through with enough curiosity and effort. I
             gravitate toward people who take responsibility for their path and want to build
             something meaningful, even when it&apos;s hard.{" "}
-            <span className="serif-italic" style={{ color: "var(--muted)", fontSize: "1.05em" }}>
+            <span className="serif-italic" style={{ color: "#ddd5c9", fontSize: "1.05em" }}>
               I think technology fails most often not because it&apos;s too complex, but because
               it forgets who it&apos;s for. I&apos;m intentional about not making that mistake.
             </span>
